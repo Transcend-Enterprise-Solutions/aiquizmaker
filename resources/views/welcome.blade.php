@@ -4,7 +4,7 @@
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
 
-        <title>Laravel - Modern Welcome</title>
+        <title>Laravel - Vibrant Welcome</title>
 
         <!-- Fonts -->
         <link rel="preconnect" href="https://fonts.bunny.net">
@@ -14,66 +14,66 @@
         @vite(['resources/css/app.css', 'resources/js/app.js'])
         @livewireStyles
     </head>
-    <body class="bg-gray-100 dark:bg-gray-900 text-gray-800 dark:text-gray-200 font-sans">
+    <body class="bg-gray-50 dark:bg-gray-900 text-gray-800 dark:text-gray-200 font-sans">
         <!-- Navigation -->
-        <nav class="bg-white dark:bg-gray-800 shadow">
-            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div class="flex justify-between items-center h-16">
-                    <a href="#" class="text-2xl font-bold text-blue-600 dark:text-blue-400">Laravel</a>
-                    <div class="hidden md:flex space-x-6">
-                        <a href="#counter" class="hover:text-blue-500">Counter</a>
-                        <livewire:login-modal />
-                        <livewire:register-modal />
-                    </div>
-                    <div class="flex items-center space-x-4">
-                        <button id="theme-toggle" class="focus:outline-none text-gray-600 dark:text-gray-300">
-                            <svg id="light-icon" class="hidden w-6 h-6" fill="none" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v3m0 12v3m9-9h-3M3 12H0m15.364-7.364l-2.121 2.121M6.364 6.364l2.121 2.121m0 9.9l-2.121-2.121m9.9 0l-2.121-2.121"/>
-                            </svg>
-                            <svg id="dark-icon" class="w-6 h-6" fill="none" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 1115.354 20.354a9 9 0 015 5z"/>
-                            </svg>
-                        </button>
-                    </div>
+        <nav class="bg-gradient-to-r from-blue-500 to-purple-600 text-white py-4">
+            <div class="container mx-auto flex justify-between items-center px-6">
+                <a href="#" class="text-2xl font-bold">Laravel</a>
+                <div class="hidden md:flex space-x-6">
+                    <a href="#counter" class="hover:underline">Counter</a>
+                    <a href="#login" class="hover:underline">Login</a>
+                    <a href="#register" class="hover:underline">Register</a>
                 </div>
+                <button id="theme-toggle" class="text-white focus:outline-none">
+                    <svg id="light-icon" class="hidden w-6 h-6" fill="none" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v3m0 12v3m9-9h-3M3 12H0m15.364-7.364l-2.121 2.121M6.364 6.364l2.121 2.121m0 9.9l-2.121-2.121m9.9 0l-2.121-2.121"/>
+                    </svg>
+                    <svg id="dark-icon" class="w-6 h-6" fill="none" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 1115.354 20.354a9 9 0 015 5z"/>
+                    </svg>
+                </button>
             </div>
         </nav>
 
         <!-- Hero Section -->
-        <header class="bg-gradient-to-r from-blue-500 to-purple-600 text-white py-20">
-            <div class="max-w-4xl mx-auto text-center">
-                <h1 class="text-5xl font-bold mb-4">Welcome to Laravel</h1>
-                <p class="text-lg">Start building modern applications with simplicity and elegance.</p>
-                <a href="#register" class="mt-8 inline-block bg-white text-blue-600 font-medium px-6 py-3 rounded-full shadow hover:bg-gray-100">Get Started</a>
+        <header class="bg-gradient-to-br from-blue-500 to-purple-600 text-white text-center py-20">
+            <div class="container mx-auto">
+                <h1 class="text-6xl font-bold mb-6">Discover Laravel</h1>
+                <p class="text-xl text-gray-200 mb-6">Fast. Elegant. Powerful.</p>
+                <div class="mt-8">
+                    <a href="#register" class="bg-white text-blue-600 font-medium px-8 py-4 rounded-full shadow-md hover:bg-gray-200">
+                        Get Started
+                    </a>
+                </div>
             </div>
         </header>
 
         <!-- Main Content -->
-        <main class="py-16 bg-gray-50 dark:bg-gray-900">
-            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-16">
+        <main class="py-12">
+            <div class="container mx-auto space-y-16 px-6">
                 <!-- Counter Section -->
-                <section id="counter" class="bg-white dark:bg-gray-800 rounded-lg shadow p-8">
-                    <h2 class="text-3xl font-semibold mb-4 text-center">Counter Component</h2>
+                <section id="counter" class="bg-gray-100 dark:bg-gray-700 rounded-lg shadow-lg p-8">
+                    <h2 class="text-2xl md:text-3xl font-bold mb-4 text-center">Interactive Counter</h2>
                     <livewire:counter />
                 </section>
 
                 <!-- Login Section -->
-                <section id="login" class="bg-white dark:bg-gray-800 rounded-lg shadow p-8">
-                    <h2 class="text-3xl font-semibold mb-4 text-center">Login Modal</h2>
+                <section id="login" class="bg-gray-100 dark:bg-gray-700 rounded-lg shadow-lg p-8">
+                    <h2 class="text-2xl md:text-3xl font-bold mb-4 text-center">Login Modal</h2>
                     <livewire:login-modal />
                 </section>
 
                 <!-- Register Section -->
-                <section id="register" class="bg-white dark:bg-gray-800 rounded-lg shadow p-8">
-                    <h2 class="text-3xl font-semibold mb-4 text-center">Register Modal</h2>
+                <section id="register" class="bg-gray-100 dark:bg-gray-700 rounded-lg shadow-lg p-8">
+                    <h2 class="text-2xl md:text-3xl font-bold mb-4 text-center">Register Modal</h2>
                     <livewire:register-modal />
                 </section>
             </div>
         </main>
 
         <!-- Footer -->
-        <footer class="bg-gray-100 dark:bg-gray-800 text-center py-6">
-            <p class="text-sm text-gray-600 dark:text-gray-400">
+        <footer class="bg-gradient-to-r from-blue-500 to-purple-600 text-white text-center py-6">
+            <p class="text-sm">
                 Laravel v{{ Illuminate\Foundation\Application::VERSION }} (PHP v{{ PHP_VERSION }})
             </p>
         </footer>
