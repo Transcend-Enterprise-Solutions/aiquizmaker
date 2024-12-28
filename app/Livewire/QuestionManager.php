@@ -38,7 +38,7 @@ class QuestionManager extends Component
         $this->validate([
             "questions.$index.question" => 'required|string',
             "questions.$index.options.*" => 'required|string',
-            "questions.$index.answer" => 'required|string',
+            "questions.$index.answer" => 'required|integer|between:0,' . (count($this->questions[$index]['options']) - 1),
         ]);
 
         $this->editing = null;
@@ -123,7 +123,8 @@ class QuestionManager extends Component
             } elseif (preg_match('/^[A-D]\)\s*(.+)/', $line, $matches)) {
                 $currentQuestion['options'][] = $matches[1];
             } elseif (stripos($line, 'Answer:') === 0) {
-                $currentQuestion['answer'] = trim(substr($line, 7));
+                $answerText = trim(substr($line, 7));
+                $currentQuestion['answer'] = array_search($answerText, $currentQuestion['options']);
             }
         }
 
@@ -154,7 +155,8 @@ class QuestionManager extends Component
                     'answer' => null,
                 ];
             } elseif (stripos($line, 'Answer:') === 0) {
-                $currentQuestion['answer'] = trim(substr($line, 7));
+                $answerText = trim(substr($line, 7));
+                $currentQuestion['answer'] = $answerText === 'True' ? 0 : 1;
             }
         }
 
