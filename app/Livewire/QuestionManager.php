@@ -13,10 +13,11 @@ class QuestionManager extends Component
     public $questionType = 'multiple_choice';
     public $questions = [];
     public $editing = null; // Tracks the index of the question being edited
+    public $chatgptResponse = ''; 
 
     // Pagination properties
     public $page = 1; // Current page
-    public $perPage = 10; // Items per page
+    public $perPage = 5; // Items per page
 
     // Validation rules
     protected $rules = [
@@ -35,15 +36,24 @@ class QuestionManager extends Component
     // Save changes to a question
     public function saveQuestion($index)
     {
-        $this->validate([
+        $rules = [
             "questions.$index.question" => 'required|string',
-            "questions.$index.options.*" => 'required|string',
-            "questions.$index.answer" => 'required|integer|between:0,' . (count($this->questions[$index]['options']) - 1),
-        ]);
-
+        ];
+    
+        if ($this->questionType === 'multiple_choice') {
+            $rules["questions.$index.options"] = 'required|array|size:4'; // Exactly 4 options
+            $rules["questions.$index.options.*"] = 'required|string|max:255';
+            $rules["questions.$index.answer"] = 'required|integer|between:0,3'; // Index of the correct answer
+        } elseif ($this->questionType === 'true_false') {
+            $rules["questions.$index.answer"] = 'required|integer|between:0,1'; // Only True (0) or False (1)
+        }
+    
+        $this->validate($rules);
+    
         $this->editing = null;
         session()->flash('success', 'Question updated successfully!');
     }
+    
 
     // Cancel editing mode
     public function cancelEdit()
@@ -55,54 +65,43 @@ class QuestionManager extends Component
     public function generateQuestions()
     {
         $this->validate();
-
+    
+        // Build the prompt
         $prompt = $this->buildPrompt();
+    
+        // Log the generated prompt for debugging
+        \Log::info('Generated Prompt', ['prompt' => $prompt]);
+    
+        // Send the prompt to the API
         $response = $this->fetchQuestionsFromAPI($prompt);
-
-        if ($response) {
-            $this->questions = $this->questionType === 'multiple_choice'
-                ? $this->parseQuestions($response)
-                : $this->parseTrueFalseQuestions($response);
-
-            session()->flash('success', 'Questions generated successfully!');
-        } else {
+    
+        if (!$response) {
             session()->flash('error', 'Failed to generate questions. Please try again.');
+            return;
         }
+    
+        // Parse the response based on the question type
+        $this->questions = $this->parseQuestionsByType($response);
+    
+        session()->flash('success', 'Questions generated successfully!');
     }
+    
 
-    // Build API prompt
-    private function buildPrompt()
+    // Centralized parsing function
+    private function parseQuestionsByType($responseText)
     {
-        return $this->questionType === 'multiple_choice'
-            ? "Generate {$this->numberOfQuestions} multiple-choice questions about '{$this->topic}'. Each question should have 4 options and indicate the correct option in the format 'Answer: optionText'."
-            : "Generate {$this->numberOfQuestions} true/false questions about '{$this->topic}'. Indicate the correct answer in the format 'Answer: True' or 'Answer: False'.";
-    }
-
-    // Fetch questions from OpenAI API
-    private function fetchQuestionsFromAPI($prompt)
-    {
-        $apiKey = env('OPENAI_API_KEY');
-
-        try {
-            $response = Http::withHeaders([
-                'Authorization' => "Bearer $apiKey",
-            ])->post('https://api.openai.com/v1/chat/completions', [
-                'model' => 'gpt-3.5-turbo',
-                'messages' => [['role' => 'user', 'content' => $prompt]],
-                'max_tokens' => 3000,
-            ]);
-
-            $data = $response->json();
-
-            return $data['choices'][0]['message']['content'] ?? null;
-        } catch (\Exception $e) {
-            session()->flash('error', 'API request failed. Please check your API key or try again later.');
-            return null;
+        if ($this->questionType === 'multiple_choice') {
+            return $this->parseMultipleChoiceQuestions($responseText);
         }
+        if ($this->questionType === 'true_false') {
+            return $this->parseTrueFalseQuestions($responseText);
+        }
+
+        return [];
     }
 
     // Parse multiple-choice questions
-    private function parseQuestions($responseText)
+    private function parseMultipleChoiceQuestions($responseText)
     {
         $lines = explode("\n", $responseText);
         $questions = [];
@@ -138,6 +137,7 @@ class QuestionManager extends Component
     // Parse true/false questions
     private function parseTrueFalseQuestions($responseText)
     {
+        \Log::info('Parsing True/False Questions', ['responseText' => $responseText]);
         $lines = explode("\n", $responseText);
         $questions = [];
         $currentQuestion = null;
@@ -145,6 +145,7 @@ class QuestionManager extends Component
         foreach ($lines as $line) {
             $line = trim($line);
 
+            // Match the question (e.g., "1. Is the sky blue?")
             if (preg_match('/^\d+\.\s*(.+)/', $line, $matches)) {
                 if ($currentQuestion) {
                     $questions[] = $currentQuestion;
@@ -154,9 +155,10 @@ class QuestionManager extends Component
                     'options' => ['True', 'False'],
                     'answer' => null,
                 ];
-            } elseif (stripos($line, 'Answer:') === 0) {
-                $answerText = trim(substr($line, 7));
-                $currentQuestion['answer'] = $answerText === 'True' ? 0 : 1;
+            }
+            // Match the answer (e.g., "Answer: True" or "Answer: False")
+            elseif (preg_match('/^Answer:\s*(True|False)/i', $line, $matches)) {
+                $currentQuestion['answer'] = strtolower($matches[1]) === 'true' ? 0 : 1;
             }
         }
 
@@ -165,6 +167,88 @@ class QuestionManager extends Component
         }
 
         return $questions;
+    }
+
+        // Build API prompt
+        // Build API prompt
+    // Build API prompt for True/False questions
+    private function buildPrompt()
+    {
+        // Check if the question type is multiple-choice or true/false
+        $questionTypeInstruction = $this->questionType === 'multiple_choice' 
+            ? "multiple-choice questions" 
+            : "true/false questions";  // For True/False questions
+
+        // Base instruction for creating questions
+        $baseInstruction = "Create {$this->numberOfQuestions} {$questionTypeInstruction} about '{$this->topic}' with difficulty level {$this->difficulty}.";
+
+        // Guidelines for structuring the questions based on the type
+        $structureGuideline = $this->questionType === 'multiple_choice' 
+            ? "Each question must have:\n1. A question text.\n2. Exactly 4 options labeled A), B), C), and D).\n3. Indicate the correct answer as 'Answer: OptionLabel'."
+            : "Each question must have:\n1. A question text.\n2. Two options: True and False.\n3. Indicate the correct answer explicitly as 'Answer: True' or 'Answer: False'.";
+
+        // Combine the instructions into one prompt
+        return "{$baseInstruction}\n\n{$structureGuideline}\n\nEnsure the response is clear and follows the required format.";
+    }
+
+
+
+    private function fetchQuestionsFromAPI($prompt)
+    {
+        $apiKey = env('OPENAI_API_KEY');
+        
+        try {
+            $response = Http::withHeaders([
+                'Authorization' => "Bearer $apiKey",
+            ])->post('https://api.openai.com/v1/chat/completions', [
+                'model' => 'gpt-3.5-turbo',
+                'messages' => [['role' => 'user', 'content' => $prompt]],
+                'max_tokens' => 2000,
+            ]);
+    
+            // Log the raw response for debugging
+            \Log::info('API Response', ['response' => $response->json()]);
+            
+            // Check the status of the response
+            if ($response->successful()) {
+                $data = $response->json();
+                $content = $data['choices'][0]['message']['content'] ?? null;
+                return $content;
+            } else {
+                $error = $response->json();
+                \Log::error('API Error', ['error' => $error]);
+                session()->flash('error', 'API request failed. Please check your API key or try again later.');
+                return null;
+            }
+        } catch (\Exception $e) {
+            $this->chatgptResponse = 'Error: ' . $e->getMessage();
+            \Log::error('API Error', ['exception' => $e->getMessage()]);
+            session()->flash('error', 'API request failed. Please try again later.');
+            return null;
+        }
+    }
+    
+    
+
+    // Validate the API response format
+    private function validateResponseFormat($responseText)
+    {
+        // Pattern for multiple-choice questions
+        $multipleChoicePattern = '/^\d+\.\s.+\n[A-D]\)\s.+\n[A-D]\)\s.+\n[A-D]\)\s.+\n[A-D]\)\s.+\nAnswer:\s[A-D]\)/m';
+        
+        // Pattern for true/false questions (case-insensitive for 'True' and 'False')
+        $trueFalsePattern = '/^\d+\.\s.+\nAnswer:\s(True|False)/mi';
+
+        // Check if the response matches either pattern
+        return preg_match($multipleChoicePattern, $responseText) || preg_match($trueFalsePattern, $responseText);
+    }
+
+    // Handle API error messages
+    private function handleApiError($message)
+    {
+        $this->chatgptResponse = $message;
+        \Log::error('OpenAI API Error', ['message' => $message]);
+        session()->flash('error', $message);
     }
 
     // Pagination helpers
@@ -197,6 +281,23 @@ class QuestionManager extends Component
     {
         if ($pageNumber >= 1 && $pageNumber <= $this->getTotalPages()) {
             $this->page = $pageNumber;
+        }
+    }
+
+    public function deleteQuestion($index)
+    {
+        if (isset($this->questions[$index])) {
+            // Remove the question at the given index
+            array_splice($this->questions, $index, 1);
+    
+            // Optional: Reset pagination if necessary
+            if ($this->page > $this->getTotalPages()) {
+                $this->page = $this->getTotalPages();
+            }
+    
+            session()->flash('success', 'Question deleted successfully!');
+        } else {
+            session()->flash('error', 'Unable to delete the question. Index not found.');
         }
     }
 
