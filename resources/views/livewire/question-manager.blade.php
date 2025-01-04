@@ -104,14 +104,16 @@
 
     <!-- Displaying Questions -->
     <div class="grid gap-10 sm:grid-cols-2 lg:grid-cols-3 mt-14">
-        @foreach ($this->paginatedQuestions as $index => $question)
+        @foreach ($this->paginatedQuestions as $pageIndex => $question)
             <div class="bg-white p-8 rounded-xl shadow-lg border border-gray-200">
-                @if ($editing === $index)
+                @if ($editing === ($pageIndex + ($page - 1) * $perPage))
                     <div>
                         <label class="block text-base font-semibold text-gray-700 mb-3">Question</label>
-                        <input type="text" wire:model="questions.{{ $index }}.question"
+                        <input type="text" wire:model="questions.{{ $pageIndex + ($page - 1) * $perPage }}.question"
                             class="w-full border-gray-300 rounded-lg shadow-md focus:ring-indigo-600 focus:border-indigo-600 px-5 py-3">
-                        @error('questions.' . $index . '.question') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
+                        @error('questions.' . ($pageIndex + ($page - 1) * $perPage) . '.question') 
+                            <span class="text-red-500 text-sm">{{ $message }}</span> 
+                        @enderror
 
                         <!-- Options for Multiple Choice or True/False -->
                         <div class="mt-6">
@@ -120,27 +122,32 @@
                                 @foreach ($question['options'] as $optionIndex => $option)
                                     <div class="flex items-center mt-4">
                                         <!-- For Multiple Choice, Use Radio Buttons -->
-                                        <input type="radio" wire:model="questions.{{ $index }}.answer" name="answer_{{ $index }}" value="{{ $optionIndex }}" class="mr-3">
-                                        <input type="text" wire:model="questions.{{ $index }}.options.{{ $optionIndex }}"
+                                        <input type="radio" wire:model="questions.{{ $pageIndex + ($page - 1) * $perPage }}.answer" 
+                                            name="answer_{{ $pageIndex + ($page - 1) * $perPage }}" value="{{ $optionIndex }}" class="mr-3">
+                                        <input type="text" wire:model="questions.{{ $pageIndex + ($page - 1) * $perPage }}.options.{{ $optionIndex }}"
                                             class="w-full border-gray-300 rounded-lg shadow-md focus:ring-indigo-600 focus:border-indigo-600 px-5 py-3">
                                     </div>
-                                    @error('questions.' . $index . '.options.' . $optionIndex) <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
+                                    @error('questions.' . ($pageIndex + ($page - 1) * $perPage) . '.options.' . $optionIndex) 
+                                        <span class="text-red-500 text-sm">{{ $message }}</span> 
+                                    @enderror
                                 @endforeach
                             @else
                                 <!-- For True/False Questions -->
                                 <div class="flex items-center mt-4">
-                                    <input type="radio" wire:model="questions.{{ $index }}.answer" name="answer_{{ $index }}" value="0" class="mr-3">
+                                    <input type="radio" wire:model="questions.{{ $pageIndex + ($page - 1) * $perPage }}.answer" 
+                                        name="answer_{{ $pageIndex + ($page - 1) * $perPage }}" value="0" class="mr-3">
                                     <span>True</span>
                                 </div>
                                 <div class="flex items-center mt-4">
-                                    <input type="radio" wire:model="questions.{{ $index }}.answer" name="answer_{{ $index }}" value="1" class="mr-3">
+                                    <input type="radio" wire:model="questions.{{ $pageIndex + ($page - 1) * $perPage }}.answer" 
+                                        name="answer_{{ $pageIndex + ($page - 1) * $perPage }}" value="1" class="mr-3">
                                     <span>False</span>
                                 </div>
                             @endif
                         </div>
 
                         <div class="mt-8 flex space-x-6">
-                            <button wire:click="saveQuestion({{ $index }})" class="bg-green-600 text-white px-6 py-3 rounded-lg shadow-md hover:bg-green-700">
+                            <button wire:click="saveQuestion({{ $pageIndex + ($page - 1) * $perPage }})" class="bg-green-600 text-white px-6 py-3 rounded-lg shadow-md hover:bg-green-700">
                                 Save
                             </button>
                             <button wire:click="cancelEdit" class="bg-gray-600 text-white px-6 py-3 rounded-lg shadow-md hover:bg-gray-700">
@@ -161,7 +168,7 @@
                         <strong>Correct Answer:</strong> {{ $question['options'][$question['answer']] ?? 'None' }}
                     </div>
 
-                    <button wire:click="editQuestion({{ $index }})"
+                    <button wire:click="editQuestion({{ $pageIndex }})"
                         class="mt-6 bg-indigo-500 text-white px-8 py-3 rounded-lg shadow-md hover:bg-indigo-600">
                         Edit
                     </button>
@@ -179,4 +186,5 @@
             Next
         </button>
     </div>
+
 </div>

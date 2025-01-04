@@ -27,11 +27,15 @@ class QuestionManager extends Component
         'questionType' => 'required|in:multiple_choice,true_false',
     ];
 
-    // Edit a specific question
-    public function editQuestion($index)
+    public function editQuestion($pageIndex)
     {
-        $this->editing = $index;
+        // Calculate the global index
+        $globalIndex = ($this->page - 1) * $this->perPage + $pageIndex;
+        
+        // Now use $globalIndex to edit the correct question
+        $this->editing = $globalIndex;
     }
+    
 
     // Save changes to a question
     public function saveQuestion($index)
@@ -230,20 +234,20 @@ class QuestionManager extends Component
     
     
 
-    // Validate the API response format
+    // for api valid8tion
     private function validateResponseFormat($responseText)
     {
-        // Pattern for multiple-choice questions
+        // for multiple choice
         $multipleChoicePattern = '/^\d+\.\s.+\n[A-D]\)\s.+\n[A-D]\)\s.+\n[A-D]\)\s.+\n[A-D]\)\s.+\nAnswer:\s[A-D]\)/m';
         
-        // Pattern for true/false questions (case-insensitive for 'True' and 'False')
+        // di gumagana masyado
         $trueFalsePattern = '/^\d+\.\s.+\nAnswer:\s(True|False)/mi';
 
-        // Check if the response matches either pattern
+        // if match respone = proceed to nest step
         return preg_match($multipleChoicePattern, $responseText) || preg_match($trueFalsePattern, $responseText);
     }
 
-    // Handle API error messages
+    // api error_handling
     private function handleApiError($message)
     {
         $this->chatgptResponse = $message;
