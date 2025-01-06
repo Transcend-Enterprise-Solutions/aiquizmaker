@@ -50,16 +50,13 @@
                             type="email" 
                             wire:model="email" 
                             id="email" 
-                            class="block w-full py-3 px-4 text-sm text-gray-800 dark:text-gray-200 bg-gray-100 dark:bg-gray-700 rounded-lg shadow focus:ring-2 focus:ring-blue-500 focus:outline-none border @if($emailInUse) border-red-500 dark:border-red-500 @else border-gray-300 dark:border-gray-600 @endif" 
+                            class="block w-full py-3 px-4 text-sm text-gray-800 dark:text-gray-200 bg-gray-100 dark:bg-gray-700 rounded-lg shadow focus:ring-2 focus:ring-blue-500 focus:outline-none border border-gray-300 dark:border-gray-600 @error('email') border-red-500 dark:border-red-500 @enderror" 
                             placeholder="Email Address"
                         />
-                        @if($emailInUse)
-                            <p class="text-sm text-red-600 mt-2">Email address is already in use.</p>
-                        @else
-                            @error('email') 
-                                <p class="text-sm text-red-600 mt-2">{{ $message }}</p> 
-                            @enderror
-                        @endif
+                        @error('email')
+                            <span class="text-red-500 text-sm">{{ $message }}</span>
+                        @enderror
+
                     </div>
 
                     <!-- Password Field -->

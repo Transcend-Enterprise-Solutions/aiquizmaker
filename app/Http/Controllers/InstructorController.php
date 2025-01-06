@@ -12,6 +12,22 @@ class InstructorController extends Controller
             abort(403, 'Unauthorized');
         }
 
-        return view('dashboards.instructor');
+        return view('dashboards.instructorfolder.welcome');
     }
+
+    public function welcome()
+    {
+        if (auth()->user()->role !== 'instructor') {
+            abort(403, 'Unauthorized');
+        }
+        return view('dashboards.instructorfolder.welcome');
+    }
+    public function quiz()
+    {
+        if (auth()->user()->role !== 'instructor') {
+            abort(403, 'Unauthorized');
+        }
+        return view('dashboards.instructorfolder.quiz');
+    }
+    
 }

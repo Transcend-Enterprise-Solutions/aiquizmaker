@@ -6,7 +6,7 @@ use App\Http\Controllers\InstructorController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\LoginController;
 use App\Http\Controllers\QuestionController;
-
+use App\Http\Controllers\User;
 // Question Form Route
 Route::get('/questions', function () {
     return view('questions.form');
@@ -73,6 +73,22 @@ Route::get('/student-dashboard', [StudentController::class, 'index'])
 Route::get('/instructor-dashboard', [InstructorController::class, 'index'])
     ->name('instructor.dashboard')
     ->middleware('auth');
+
+
+// Route for the Instructor Dashboard (Welcome page)
+Route::get('/instructor/dashboard', [InstructorController::class, 'index'])
+    ->name('instructor.welcome')
+    ->middleware('auth');
+
+// Route for Instructor Quiz page, named 'instructor.quiz'
+Route::get('/instructor/quiz', [InstructorController::class, 'quiz'])
+    ->name('instructor.quiz')
+    ->middleware('auth');
+
+
+
+Route::get('/get-students', [StudentController::class, 'getStudents'])->name('get-students');
+
 
 // Profile Routes
 Route::middleware('auth')->group(function () {

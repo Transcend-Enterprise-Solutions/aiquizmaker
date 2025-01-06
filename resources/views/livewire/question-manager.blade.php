@@ -172,6 +172,11 @@
                         class="mt-6 bg-indigo-500 text-white px-8 py-3 rounded-lg shadow-md hover:bg-indigo-600">
                         Edit
                     </button>
+                                    <!-- Add Delete Button -->
+                <button wire:click="deleteQuestion({{ $pageIndex + ($page - 1) * $perPage }})"
+                    class="mt-6 bg-red-600 text-white px-8 py-3 rounded-lg shadow-md hover:bg-red-700">
+                    Delete
+                </button>
                 @endif
             </div>
         @endforeach
