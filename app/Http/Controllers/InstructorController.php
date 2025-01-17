@@ -29,5 +29,12 @@ class InstructorController extends Controller
         }
         return view('dashboards.instructorfolder.quiz');
     }
+    public function upload()
+    {
+        if (auth()->user()->role !== 'instructor') {
+            abort(403, 'Unauthorized');
+        }
+        return view('dashboards.instructorfolder.upload');
+    }
     
 }

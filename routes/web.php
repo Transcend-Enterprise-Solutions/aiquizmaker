@@ -7,6 +7,9 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\LoginController;
 use App\Http\Controllers\QuestionController;
 use App\Http\Controllers\User;
+use App\Http\Controllers\QuizController;
+use Inertia\Inertia; 
+
 // Question Form Route
 Route::get('/questions', function () {
     return view('questions.form');
@@ -86,9 +89,16 @@ Route::get('/instructor/quiz', [InstructorController::class, 'quiz'])
     ->middleware('auth');
 
 
+// Route for Instructor Uplaod CSV, named 'instructor.upload'
+Route::get('/instructor/upload', [InstructorController::class, 'upload'])
+    ->name('instructor.upload')
+    ->middleware('auth');
+
 
 Route::get('/get-students', [StudentController::class, 'getStudents'])->name('get-students');
 
+// Quiz Routes
+Route::get('/quiz/{id}', [QuizController::class, 'show'])->name('quiz.view');
 
 // Profile Routes
 Route::middleware('auth')->group(function () {
