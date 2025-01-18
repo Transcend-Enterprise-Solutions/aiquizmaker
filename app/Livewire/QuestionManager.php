@@ -12,12 +12,14 @@ class QuestionManager extends Component
     public $numberOfQuestions = 5;
     public $questionType = 'multiple_choice';
     public $questions = [];
-    public $editing = null;
-    public $chatgptResponse = '';
+    public $editing = null; // Tracks the index of the question being edited
+    public $chatgptResponse = ''; 
 
-    public $page = 1;
-    public $perPage = 5;
+    // Pagination properties
+    public $page = 1; // Current page
+    public $perPage = 5; // Items per page
 
+    // Validation rules
     protected $rules = [
         'topic' => 'required|string|max:255',
         'difficulty' => 'required|in:easy,medium,hard',
@@ -25,65 +27,180 @@ class QuestionManager extends Component
         'questionType' => 'required|in:multiple_choice,true_false',
     ];
 
-    public function editQuestion($globalIndex)
+    public function editQuestion($pageIndex)
     {
+        // Calculate the global index
+        $globalIndex = ($this->page - 1) * $this->perPage + $pageIndex;
+        
+        // Now use $globalIndex to edit the correct question
         $this->editing = $globalIndex;
     }
+    
 
-    public function saveQuestion($globalIndex)
+    // Save changes to a question
+    public function saveQuestion($index)
     {
-        $rules = ["questions.$globalIndex.question" => 'required|string'];
-
+        $rules = [
+            "questions.$index.question" => 'required|string',
+        ];
+    
         if ($this->questionType === 'multiple_choice') {
-            $rules += [
-                "questions.$globalIndex.options" => 'required|array|size:4',
-                "questions.$globalIndex.options.*" => 'required|string|max:255',
-                "questions.$globalIndex.answer" => 'required|integer|between:0,3',
-            ];
-        } else {
-            $rules["questions.$globalIndex.answer"] = 'required|integer|between:0,1';
+            $rules["questions.$index.options"] = 'required|array|size:4'; // Exactly 4 options
+            $rules["questions.$index.options.*"] = 'required|string|max:255';
+            $rules["questions.$index.answer"] = 'required|integer|between:0,3'; // Index of the correct answer
+        } elseif ($this->questionType === 'true_false') {
+            $rules["questions.$index.answer"] = 'required|integer|between:0,1'; // Only True (0) or False (1)
         }
-
+    
+        $this->validate($rules);
+    
         $this->editing = null;
         session()->flash('success', 'Question updated successfully!');
     }
+    
 
+    // Cancel editing mode
     public function cancelEdit()
     {
         $this->editing = null;
     }
 
+    // Generate questions using OpenAI API
     public function generateQuestions()
     {
         $this->validate();
-
+    
+        // Build the prompt
         $prompt = $this->buildPrompt();
+    
+        // Log the generated prompt for debugging
+        \Log::info('Generated Prompt', ['prompt' => $prompt]);
+    
+        // Send the prompt to the API
         $response = $this->fetchQuestionsFromAPI($prompt);
-
-        if ($response) {
-            $this->questions = $this->questionType === 'multiple_choice'
-                ? $this->parseQuestions($response)
-                : $this->parseTrueFalseQuestions($response);
-
-            session()->flash('success', 'Questions generated successfully!');
-        } else {
+    
+        if (!$response) {
             session()->flash('error', 'Failed to generate questions. Please try again.');
+            return;
         }
+    
+        // Parse the response based on the question type
+        $this->questions = $this->parseQuestionsByType($response);
+    
+        session()->flash('success', 'Questions generated successfully!');
+    }
+    
+
+    // Centralized parsing function
+    private function parseQuestionsByType($responseText)
+    {
+        if ($this->questionType === 'multiple_choice') {
+            return $this->parseMultipleChoiceQuestions($responseText);
+        }
+        if ($this->questionType === 'true_false') {
+            return $this->parseTrueFalseQuestions($responseText);
+        }
+
+        return [];
     }
 
+    // Parse multiple-choice questions
+    private function parseMultipleChoiceQuestions($responseText)
+    {
+        $lines = explode("\n", $responseText);
+        $questions = [];
+        $currentQuestion = null;
+
+        foreach ($lines as $line) {
+            $line = trim($line);
+
+            if (preg_match('/^\d+\.\s*(.+)/', $line, $matches)) {
+                if ($currentQuestion) {
+                    $questions[] = $currentQuestion;
+                }
+                $currentQuestion = [
+                    'question' => $matches[1],
+                    'options' => [],
+                    'answer' => null,
+                ];
+            } elseif (preg_match('/^[A-D]\)\s*(.+)/', $line, $matches)) {
+                $currentQuestion['options'][] = $matches[1];
+            } elseif (stripos($line, 'Answer:') === 0) {
+                $answerText = trim(substr($line, 7));
+                $currentQuestion['answer'] = array_search($answerText, $currentQuestion['options']);
+            }
+        }
+
+        if ($currentQuestion) {
+            $questions[] = $currentQuestion;
+        }
+
+        return $questions;
+    }
+
+    // Parse true/false questions
+    private function parseTrueFalseQuestions($responseText)
+    {
+        \Log::info('Parsing True/False Questions', ['responseText' => $responseText]);
+        $lines = explode("\n", $responseText);
+        $questions = [];
+        $currentQuestion = null;
+
+        foreach ($lines as $line) {
+            $line = trim($line);
+
+            // Match the question (e.g., "1. Is the sky blue?")
+            if (preg_match('/^\d+\.\s*(.+)/', $line, $matches)) {
+                if ($currentQuestion) {
+                    $questions[] = $currentQuestion;
+                }
+                $currentQuestion = [
+                    'question' => $matches[1],
+                    'options' => ['True', 'False'],
+                    'answer' => null,
+                ];
+            }
+            // Match the answer (e.g., "Answer: True" or "Answer: False")
+            elseif (preg_match('/^Answer:\s*(True|False)/i', $line, $matches)) {
+                $currentQuestion['answer'] = strtolower($matches[1]) === 'true' ? 0 : 1;
+            }
+        }
+
+        if ($currentQuestion) {
+            $questions[] = $currentQuestion;
+        }
+
+        return $questions;
+    }
+
+        // Build API prompt
+        // Build API prompt
+    // Build API prompt for True/False questions
     private function buildPrompt()
     {
-        $typeSpecificInstruction = $this->questionType === 'multiple_choice'
-            ? "Each question must have:\n1. A question text.\n2. Exactly 4 answer options labeled A), B), C), and D).\n3. Indicate the correct answer explicitly in the format: 'Answer: OptionLabel'."
-            : "Each question must have:\n1. A question text.\n2. Two answer options: True and False.\n3. Indicate the correct answer explicitly in the format: 'Answer: True' or 'Answer: False'.";
+        // Check if the question type is multiple-choice or true/false
+        $questionTypeInstruction = $this->questionType === 'multiple_choice' 
+            ? "multiple-choice questions" 
+            : "true/false questions";  // For True/False questions
 
-        return "Create {$this->numberOfQuestions} {$this->questionType} questions about '{$this->topic}' at {$this->difficulty} level.\n\n$typeSpecificInstruction\n\nEnsure the response is well-structured and adheres to the specified format.";
+        // Base instruction for creating questions
+        $baseInstruction = "Create {$this->numberOfQuestions} {$questionTypeInstruction} about '{$this->topic}' with difficulty level {$this->difficulty}.";
+
+        // Guidelines for structuring the questions based on the type
+        $structureGuideline = $this->questionType === 'multiple_choice' 
+            ? "Each question must have:\n1. A question text.\n2. Exactly 4 options labeled A), B), C), and D).\n3. Indicate the correct answer as 'Answer: OptionLabel'."
+            : "Each question must have:\n1. A question text.\n2. Two options: True and False.\n3. Indicate the correct answer explicitly as 'Answer: True' or 'Answer: False'.";
+
+        // Combine the instructions into one prompt
+        return "{$baseInstruction}\n\n{$structureGuideline}\n\nEnsure the response is clear and follows the required format.";
     }
+
+
 
     private function fetchQuestionsFromAPI($prompt)
     {
         $apiKey = env('OPENAI_API_KEY');
-    
+        
         try {
             $response = Http::withHeaders([
                 'Authorization' => "Bearer $apiKey",
@@ -93,88 +210,52 @@ class QuestionManager extends Component
                 'max_tokens' => 2000,
             ]);
     
-            $content = $response->json()['choices'][0]['message']['content'] ?? null;
-            $this->chatgptResponse = $content;
-    
-            \Log::info('OpenAI Response', ['response' => $content]);
-    
-            if ($content && $this->validateResponseFormat($content)) {
+            // Log the raw response for debugging
+            \Log::info('API Response', ['response' => $response->json()]);
+            
+            // Check the status of the response
+            if ($response->successful()) {
+                $data = $response->json();
+                $content = $data['choices'][0]['message']['content'] ?? null;
                 return $content;
             } else {
-                \Log::error('Response Validation Failed', [
-                    'response' => $content,
-                    'expected_format' => $this->questionType,
-                ]);
-                session()->flash('error', 'Invalid response format. Please check debugging info.');
+                $error = $response->json();
+                \Log::error('API Error', ['error' => $error]);
+                session()->flash('error', 'API request failed. Please check your API key or try again later.');
                 return null;
             }
         } catch (\Exception $e) {
             $this->chatgptResponse = 'Error: ' . $e->getMessage();
-            \Log::error('OpenAI API Error', ['exception' => $e->getMessage()]);
-            session()->flash('error', 'API request failed. Please check your API key or try again later.');
+            \Log::error('API Error', ['exception' => $e->getMessage()]);
+            session()->flash('error', 'API request failed. Please try again later.');
             return null;
         }
     }
     
+    
 
+    // for api valid8tion
     private function validateResponseFormat($responseText)
     {
-        $patterns = [
-            'multiple_choice' => '/^\\d+\\.\\s.+\\nA\\)\\s.+\\nB\\)\\s.+\\nC\\)\\s.+\\nD\\)\\s.+\\nAnswer:\\s[A-D]\\)?/mi',
-            'true_false' => '/^\\d+\\.\\s.+\\nAnswer:\\s(True|False)/mi',
-        ];
-    
-        return preg_match($patterns[$this->questionType], $responseText);
-    }
-    
+        // for multiple choice
+        $multipleChoicePattern = '/^\d+\.\s.+\n[A-D]\)\s.+\n[A-D]\)\s.+\n[A-D]\)\s.+\n[A-D]\)\s.+\nAnswer:\s[A-D]\)/m';
+        
+        // di gumagana masyado
+        $trueFalsePattern = '/^\d+\.\s.+\nAnswer:\s(True|False)/mi';
 
-    private function parseQuestions($responseText)
+        // if match respone = proceed to nest step
+        return preg_match($multipleChoicePattern, $responseText) || preg_match($trueFalsePattern, $responseText);
+    }
+
+    // api error_handling
+    private function handleApiError($message)
     {
-        return $this->parseResponse($responseText, true);
+        $this->chatgptResponse = $message;
+        \Log::error('OpenAI API Error', ['message' => $message]);
+        session()->flash('error', $message);
     }
 
-    private function parseTrueFalseQuestions($responseText)
-    {
-        return $this->parseResponse($responseText, false);
-    }
-
-    private function parseResponse($responseText, $isMultipleChoice)
-    {
-        $lines = explode("\n", $responseText);
-        $questions = [];
-        $currentQuestion = null;
-    
-        foreach ($lines as $line) {
-            $line = trim($line);
-    
-            // Match question text (e.g., "1. What is HTML?")
-            if (preg_match('/^\\d+\\.\\s*(.+)/', $line, $matches)) {
-                if ($currentQuestion) $questions[] = $currentQuestion;
-                $currentQuestion = [
-                    'question' => $matches[1],
-                    'options' => $isMultipleChoice ? [] : ['True', 'False'],
-                    'answer' => null,
-                ];
-            }
-            // Match multiple-choice options (e.g., "A) Option Text")
-            elseif ($isMultipleChoice && preg_match('/^[A-D]\\)\\s*(.+)/', $line, $matches)) {
-                $currentQuestion['options'][] = strip_tags($matches[1]); // Remove any HTML tags
-            }
-            // Match answer (e.g., "Answer: A" or "Answer: True")
-            elseif (preg_match('/^Answer:\\s*([A-D]|True|False)\\)?/i', $line, $matches)) {
-                $answerText = trim($matches[1]);
-                $currentQuestion['answer'] = $isMultipleChoice
-                    ? array_search(strtoupper($answerText), ['A', 'B', 'C', 'D'])
-                    : (strtolower($answerText) === 'true' ? 0 : 1);
-            }
-        }
-    
-        if ($currentQuestion) $questions[] = $currentQuestion;
-    
-        return $questions;
-    }
-    
-
+    // Pagination helpers
     public function getTotalPages()
     {
         return ceil(count($this->questions) / $this->perPage);
@@ -188,12 +269,16 @@ class QuestionManager extends Component
 
     public function nextPage()
     {
-        if ($this->page < $this->getTotalPages()) $this->page++;
+        if ($this->page < $this->getTotalPages()) {
+            $this->page++;
+        }
     }
 
     public function previousPage()
     {
-        if ($this->page > 1) $this->page--;
+        if ($this->page > 1) {
+            $this->page--;
+        }
     }
 
     public function goToPage($pageNumber)
@@ -203,23 +288,26 @@ class QuestionManager extends Component
         }
     }
 
-    public function deleteQuestion($globalIndex)
+    public function deleteQuestion($index)
     {
-        if (isset($this->questions[$globalIndex])) {
-            array_splice($this->questions, $globalIndex, 1);
+        if (isset($this->questions[$index])) {
+            // Remove the question at the given index
+            array_splice($this->questions, $index, 1);
+    
+            // Optional: Reset pagination if necessary
             if ($this->page > $this->getTotalPages()) {
                 $this->page = $this->getTotalPages();
             }
+    
             session()->flash('success', 'Question deleted successfully!');
         } else {
-            session()->flash('error', 'Unable to delete the question.');
+            session()->flash('error', 'Unable to delete the question. Index not found.');
         }
     }
 
+    // Render Livewire component
     public function render()
     {
-        return view('livewire.question-manager', [
-            'paginatedQuestions' => $this->getPaginatedQuestionsProperty(),
-        ]);
+        return view('livewire.question-manager');
     }
 }
