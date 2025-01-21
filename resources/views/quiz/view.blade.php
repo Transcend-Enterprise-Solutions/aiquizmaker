@@ -1,101 +1,105 @@
-@extends('layouts.app') <!-- Let’s start with a solid base -->
+@extends('layouts.app')
 
 @section('content')
 <div class="container mx-auto px-6 lg:px-8 space-y-16 max-w-screen-xl pt-20">
     <!-- Quiz Header -->
     <section class="relative bg-gradient-to-r from-indigo-500 to-purple-600 text-white rounded-3xl shadow-xl p-12">
-        <div class="absolute inset-0 bg-gradient-to-br from-black/30 via-transparent to-black/40 rounded-3xl"></div>
-        <div class="relative z-10 space-y-6 max-w-4xl">
-            <h1 class="text-5xl font-extrabold leading-tight tracking-tight">
-                {{ $quiz->quiz_name }}
-            </h1>
-            <p class="text-lg font-medium">
-                This quiz will take approximately 
-                <span class="font-semibold">{{ $quiz->duration }} minutes</span>. Let’s see how much you know!
-            </p>
-            <div class="flex flex-wrap gap-4 text-sm sm:text-base">
-                <div class="bg-white/20 text-white px-5 py-2 rounded-full">
-                    Quiz Set: <span class="font-bold">{{ $quiz->quiz_set ?? 'Not Available' }}</span>
-                </div>
-                <div class="bg-white/20 text-white px-5 py-2 rounded-full">
-                    Last Updated: <span class="font-bold">{{ $quiz->updated_at->format('F j, Y') }}</span>
-                </div>
-            </div>
-        </div>
+        <h1 class="text-5xl font-extrabold">{{ $quiz->quiz_name }}</h1>
+        <p class="text-lg font-medium">Duration: {{ $quiz->duration }} minutes</p>
+        @if ($quiz->quiz_set)
+            <p class="text-lg font-medium">Quiz Set: {{ $quiz->quiz_set }}</p>
+        @endif
     </section>
 
     <!-- Questions Section -->
     <section>
         <header class="mb-12">
             <h2 class="text-4xl font-bold text-gray-800">Questions</h2>
-            <p class="text-gray-600">
-                Carefully review each question and test your knowledge.
-            </p>
         </header>
 
-        @if ($quiz->quizzes->isEmpty())
-            <div class="bg-yellow-100 border-l-4 border-yellow-400 p-6 rounded-lg">
-                <p class="text-yellow-800 font-semibold">
-                    No questions available yet. Check back later!
-                </p>
-            </div>
-        @else
+        @if ($quiz->quizzes && $quiz->quizzes->isNotEmpty())
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-                @foreach ($quiz->quizzes as $index => $question)
-                    <!-- Question Card -->
-                    <div x-data="{ open: false }" class="bg-white rounded-xl shadow-lg p-6 hover:shadow-xl transition">
-                        <div class="flex justify-between items-start">
-                            <div>
-                                <h3 class="text-lg font-semibold text-gray-900">
-                                    Question {{ $index + 1 }}
-                                </h3>
-                                <p class="text-gray-700 mt-2">
-                                    {{ Str::limit($question->question, 80, '...') }}
-                                </p>
-                            </div>
-                            <button
-                                @click="open = !open"
-                                class="text-indigo-600 hover:text-indigo-800 font-medium"
-                            >
-                                <span x-show="!open">Details</span>
-                                <span x-show="open" x-cloak>Hide</span>
-                            </button>
+                @foreach ($quiz->quizzes as $question)
+                    <div x-data="questionEditor({{ json_encode($question) }})" class="bg-white rounded-xl shadow-lg p-6">
+                        <!-- View Mode -->
+                        <div x-show="!isEditing">
+                            <h3 class="text-lg font-semibold text-gray-900" x-text="data.question"></h3>
+                            <ul class="mt-4">
+                                <template x-for="(option, index) in data.options" :key="index">
+                                    <li>
+                                        <input type="radio" :checked="data.correct_answer === option" disabled>
+                                        <span x-text="option"></span>
+                                    </li>
+                                </template>
+                            </ul>
+                            <button @click="isEditing = true" class="mt-4 px-4 py-2 bg-blue-500 text-white rounded">Edit</button>
                         </div>
 
-                        <!-- Question Details -->
-                        <div x-show="open" x-collapse class="mt-4">
-                            @php
-                                $options = json_decode($question->option, true);
-                            @endphp
+                        <!-- Edit Mode -->
+                        <div x-show="isEditing" class="space-y-4">
+                            <label class="block text-gray-700 font-medium">Question</label>
+                            <input type="text" x-model="data.question" class="w-full border rounded p-2">
 
-                            @if (is_array($options) && count($options))
-                                <ul class="space-y-2">
-                                    @foreach ($options as $key => $option)
-                                        <li class="text-gray-600">
-                                            <span class="font-semibold">Option {{ $key + 1 }}:</span>
-                                            {{ $option ?? 'N/A' }}
-                                        </li>
-                                    @endforeach
-                                </ul>
-                            @else
-                                <p class="text-gray-500 mt-2">No options provided for this question.</p>
-                            @endif
+                            <label class="block text-gray-700 font-medium">Options</label>
+                            <template x-for="(option, index) in data.options" :key="index">
+                                <div>
+                                    <input type="radio" x-model="data.correct_answer" :value="option">
+                                    <input type="text" x-model="data.options[index]" class="w-full border rounded p-2">
+                                </div>
+                            </template>
 
-                            <p class="text-green-600 font-medium mt-4">
-                                Correct Answer: <span class="font-bold">{{ $question->correct_answer }}</span>
-                            </p>
+                            <button @click="save" class="px-4 py-2 bg-green-500 text-white rounded">Save</button>
+                            <button @click="isEditing = false" class="px-4 py-2 bg-gray-500 text-white rounded">Cancel</button>
                         </div>
                     </div>
                 @endforeach
             </div>
+        @else
+            <p>No questions are available for this quiz.</p>
         @endif
     </section>
-
-    <!-- Back Button -->
-    <section class="text-center">
-        <a href="{{ url()->previous() }}" class="inline-block bg-gradient-to-r from-indigo-500 to-purple-600 text-white font-medium px-8 py-3 rounded-full shadow-lg hover:scale-105 transition">
-            Back to Quizzes
-        </a>
-    </section>
 </div>
+
+<!-- Alpine.js Script for Question Editing -->
+<script>
+    function questionEditor(question) {
+        return {
+            isEditing: false,
+            data: {
+                id: question.id,
+                question: question.question,
+                options: JSON.parse(question.option || '[]'), // Ensure options are parsed as an array
+                correct_answer: question.correct_answer,
+            },
+            save() {
+                const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+
+                fetch(`/questions/${this.data.id}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': csrfToken,
+                    },
+                    body: JSON.stringify(this.data),
+                })
+                .then((response) => {
+                    if (!response.ok) {
+                        return response.json().then((data) => {
+                            throw new Error(data.error || 'Failed to save changes');
+                        });
+                    }
+                    return response.json();
+                })
+                .then(() => {
+                    alert('Question updated successfully!');
+                    this.isEditing = false;
+                })
+                .catch((error) => {
+                    console.error(error);
+                    alert('An error occurred while saving the question.');
+                });
+            },
+        };
+    }
+</script>
 @endsection

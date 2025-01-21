@@ -9,19 +9,23 @@ class Quiz extends Model
 {
     use HasFactory;
 
-    protected $table = 'quizzes';
-    protected $primaryKey = 'id';
-    
+    protected $table = 'quizzes'; // Table name
+    protected $primaryKey = 'id'; // Primary key
+    protected $keyType = 'int'; // Primary key type
+
     protected $fillable = [
-        'quiz_id',
+        'quiz_id', // Foreign key referencing QuizList
         'user_id',
         'question',
-        'option',
+        'option', // JSON column for options
         'correct_answer',
     ];
 
+    /**
+     * Each question belongs to a specific quiz (QuizList).
+     */
     public function quizList()
     {
-        return $this->belongsTo(QuizList::class, 'quiz_id', 'quiz_id'); // Link via quiz_id
+        return $this->belongsTo(QuizList::class, 'quiz_id', 'quiz_id');
     }
 }

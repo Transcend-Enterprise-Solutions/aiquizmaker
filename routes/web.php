@@ -95,16 +95,16 @@ Route::get('/instructor/upload', [InstructorController::class, 'upload'])
     ->middleware('auth');
 
 
+// Fetch students
 Route::get('/get-students', [StudentController::class, 'getStudents'])->name('get-students');
 
 // Quiz Routes
 Route::get('/quiz/{id}', [QuizController::class, 'show'])->name('quiz.view');
 
-// Profile Routes
-Route::middleware('auth')->group(function () {
-    Route::get('/profile', [ProfileController::class, 'show'])->name('profile.show');
-    Route::post('/profile', [ProfileController::class, 'update'])->name('profile.update');
-});
+// Question Routes
+Route::put('/questions/{id}', [QuizController::class, 'update'])->name('questions.update'); // Update question
+Route::delete('/questions/{id}', [QuizController::class, 'destroy'])->name('questions.destroy'); // Delete question
+
 
 // Welcome Page
 Route::get('/', function () {
