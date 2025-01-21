@@ -1,0 +1,21 @@
+/* Example of custom Toastr styles */
+#toast-container > .toast-success {
+    background: linear-gradient(90deg, #56ab2f, #a8e063); /* Gradient background */
+    color: #ffffff;
+    font-weight: bold;
+    border-radius: 8px;
+    box-shadow: 0px 5px 10px rgba(0, 0, 0, 0.2);
+}
+
+#toast-container > .toast-error {
+    background-color: #ff5252; /* Custom red */
+    color: #ffffff;
+    font-weight: bold;
+    border-radius: 8px;
+    box-shadow: 0px 5px 10px rgba(0, 0, 0, 0.2);
+}
+
+.toast-progress {
+    background-color: #ffffff; /* White progress bar */
+    height: 4px;
+}

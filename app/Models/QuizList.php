@@ -19,6 +19,8 @@ class QuizList extends Model
         'quiz_name',
         'duration',
         'quiz_set',
+        'start_date',
+        'end_date',
     ];
 
     public function quizzes()
