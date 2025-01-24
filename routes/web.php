@@ -9,6 +9,8 @@ use App\Http\Controllers\QuestionController;
 use App\Http\Controllers\User;
 use App\Http\Controllers\QuizController;
 use Inertia\Inertia; 
+use App\Http\Controllers\AdminController;
+use App\Http\Controllers\SubjectController;
 
 // Question Form Route
 Route::get('/questions', function () {
@@ -49,6 +51,8 @@ Route::post('/save-questions', function (\Illuminate\Http\Request $request) {
 
 
 
+
+
 // Logout Route
 
 Route::post('/logout', function () {
@@ -76,6 +80,35 @@ Route::get('/student-dashboard', [StudentController::class, 'index'])
 Route::get('/instructor-dashboard', [InstructorController::class, 'index'])
     ->name('instructor.dashboard')
     ->middleware('auth');
+
+
+// Admin Dashboard
+Route::get('/admin-dashboard', [AdminController::class, 'index'])
+    ->name('admin.dashboard')
+    ->middleware('auth');
+
+// Create a Subject
+Route::get('/admin/create-subject', [AdminController::class, 'showCreateSubjectForm'])
+    ->name('admin.createSubject')
+    ->middleware('auth');
+    
+Route::post('/admin/create-subject', [AdminController::class, 'createSubject'])
+    ->name('admin.storeSubject')
+    ->middleware('auth');
+
+// Display All Subjects
+Route::get('/admin/subjects', [AdminController::class, 'manageSubjects'])
+    ->name('admin.subjects')
+    ->middleware('auth');
+
+// Assign Subjects to Students
+Route::get('/admin/assign-subject', [AdminController::class, 'assignSubjectForm'])
+    ->name('admin.assignSubject')
+    ->middleware('auth');
+Route::post('/admin/assign-subject', [AdminController::class, 'assignSubjectToStudent'])
+    ->name('admin.storeAssignSubject')
+    ->middleware('auth');
+
 
 
 // Route for the Instructor Dashboard (Welcome page)

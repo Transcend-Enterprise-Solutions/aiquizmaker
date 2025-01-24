@@ -30,15 +30,29 @@ class LoginModal extends Component
     public function login()
     {
         $this->validate();
-
+    
         if (Auth::attempt(['email' => $this->email, 'password' => $this->password])) {
-            session()->flash('message', 'Login successful!');
-            return redirect()->to('/dashboard');
+            $user = Auth::user(); // Get the authenticated user
+    
+            toastr()->success('Logged in successfully.');
+    
+            // Check the role and redirect accordingly
+            if ($user->role === 'admin') {
+                return redirect()->to('/admin-dashboard');
+            } elseif ($user->role === 'instructor') {
+                return redirect()->to('/instructor-dashboard');
+            } elseif ($user->role === 'student') {
+                return redirect()->to('/student-dashboard');
+            } else {
+                // Default redirection if role is not matched
+                session()->flash('error', 'Role not recognized.');
+                return redirect()->to('/');
+            }
         } else {
             session()->flash('error', 'Invalid credentials.');
         }
     }
-
+    
     public function render()
     {
         return view('livewire.login-modal');

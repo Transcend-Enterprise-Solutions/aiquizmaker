@@ -49,6 +49,16 @@ class User extends Authenticatable
         return $this->belongsTo(Role::class);
     }
 
+    public function subjects()
+    {
+        return $this->belongsToMany(Subject::class, 'instructor_subject', 'instructor_id', 'subject_id');
+    }
+
+    public function hasRole($role)
+    {
+        return $this->role->name === $role;
+    }
+
 
     protected function casts(): array
     {

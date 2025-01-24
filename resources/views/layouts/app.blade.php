@@ -18,8 +18,14 @@
 <body class="bg-gray-50 dark:bg-gray-900 text-gray-800 dark:text-gray-200">
     <div class="min-h-screen flex flex-col">
 
-            <!-- Include the Navbar and Sidebar -->
-        @include('nav')
+        @if(Auth::user()->role == 'instructor')
+            @include('nav')
+        @endif
+
+        @if(Auth::user()->role == 'admin')
+            @include('adminnav')
+        @endif
+
         <!-- Main Content -->
         <main class="flex-grow container mx-auto p-4">
             @yield('content')
