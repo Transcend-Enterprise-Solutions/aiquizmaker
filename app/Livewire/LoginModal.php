@@ -42,7 +42,7 @@ class LoginModal extends Component
             } elseif ($user->role === 'instructor') {
                 return redirect()->to('/instructor-dashboard');
             } elseif ($user->role === 'student') {
-                return redirect()->to('/student-dashboard');
+                return redirect()->to('/student/dashboard');
             } else {
                 // Default redirection if role is not matched
                 session()->flash('error', 'Role not recognized.');

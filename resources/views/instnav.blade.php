@@ -128,7 +128,18 @@
             <span class="ms-3">Upload Quiz</span>
           </a>
       </li>
-
+      <li>
+          <a wire:navigate href="{{ route('instructor.enroll') }}" 
+            class="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group
+            {{ request()->routeIs('instructor.enroll') ? 'bg-gray-200 dark:bg-gray-800 text-indigo-600' : '' }}">
+            <svg class="w-5 h-5 transition duration-75 
+                {{ request()->routeIs('instructor.enroll') ? 'text-indigo-600' : 'text-gray-500 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white' }}" 
+                xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M10 2a8 8 0 1 1-8 8 8 8 0 0 1 8-8zm3 9H7a1 1 0 1 1 0-2h6a1 1 0 0 1 0 2z" clip-rule="evenodd"/>
+            </svg>
+            <span class="ms-3">Enroll a student</span>
+          </a>
+      </li>
 
       </ul>
    </div>

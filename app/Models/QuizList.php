@@ -21,11 +21,24 @@ class QuizList extends Model
         'quiz_set',
         'start_date',
         'end_date',
+        'subject_id',
     ];
 
-    /**
-     * Relationship: A QuizList has many Questions.
-     */
+    public function questions()
+    {
+        return $this->hasMany(Quiz::class, 'quiz_id', 'quiz_id'); // Link quizzes via the 'quiz_id' field
+    }
+    
+    public function quizLists()
+    {
+        return $this->hasMany(QuizList::class, 'subject_id', 'id'); // Link quiz lists to subjects
+    }
+        
+    public function subject()
+    {
+        return $this->belongsTo(Subject::class);
+    }
+
     public function quizzes()
     {
         return $this->hasMany(Question::class, 'quiz_id', 'quiz_id'); // 'quiz_id' is the foreign key in the questions table

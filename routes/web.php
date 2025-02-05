@@ -72,10 +72,40 @@ Route::get('/dashboard', function () {
 })->middleware('auth')->name('dashboard');
 
 // Student Dashboard
-Route::get('/student-dashboard', [StudentController::class, 'index'])
+Route::get('/student/dashboard', [StudentController::class, 'index'])
     ->name('student.dashboard')
     ->middleware('auth');
 
+
+Route::get('/student/subjects', [StudentController::class, 'enrolledSubjects'])
+    ->name('student.enrolledSubjects')
+    ->middleware('auth');
+
+Route::get('/student/quizzes', [StudentController::class, 'quizzes'])
+    ->name('student.quizzes')
+    ->middleware('auth');
+
+Route::get('/student/quiz/{quizId}', [StudentController::class, 'takeQuiz'])
+    ->name('student.takeQuiz')
+    ->middleware('auth');
+
+Route::post('/student/quiz/{quizId}/submit', [StudentController::class, 'submitQuiz'])
+    ->name('student.submitQuiz')
+    ->middleware('auth');
+
+Route::get('/student/quiz/{quizId}', [StudentController::class, 'takeQuiz'])->name('student.takeQuiz');
+
+Route::get('/student/quiz/{quizId}/review', [StudentController::class, 'reviewQuiz'])->name('student.reviewQuiz');
+
+
+Route::get('/student/results', [StudentController::class, 'showResults'])->name('student.results');
+
+
+
+
+
+
+// Profile Routes
 // Instructor Dashboard
 Route::get('/instructor-dashboard', [InstructorController::class, 'index'])
     ->name('instructor.dashboard')
@@ -126,6 +156,12 @@ Route::get('/instructor/quiz', [InstructorController::class, 'quiz'])
 Route::get('/instructor/upload', [InstructorController::class, 'upload'])
     ->name('instructor.upload')
     ->middleware('auth');
+
+
+    // Route for Instructor Uplaod CSV, named 'instructor.upload'
+Route::get('/instructor/enroll', [InstructorController::class, 'enroll'])
+->name('instructor.enroll')
+->middleware('auth');
 
 
 // Fetch students

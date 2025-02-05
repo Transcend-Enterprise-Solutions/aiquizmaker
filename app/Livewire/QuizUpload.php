@@ -2,11 +2,11 @@
 
 namespace App\Livewire;
 
-use Carbon\Carbon;
 use Livewire\Component;
 use Livewire\WithFileUploads;
 use App\Models\Quiz;
 use App\Models\QuizList;
+use App\Models\Subject; // Add the Subject model
 
 class QuizUpload extends Component
 {
@@ -16,70 +16,67 @@ class QuizUpload extends Component
     public $quizName;
     public $quizDuration;
     public $quizSet;
+    public $subject; // New property for selected subject
     public $showModal = false;
     public $startDate;
     public $endDate;
 
-
     public function uploadQuiz()
     {
-
-        // Validate the form inputs
+        // Validate form inputs
         $this->validate([
             'csvFile' => 'required|file|mimes:csv,txt|max:2048',
             'quizName' => 'required|string|max:255',
             'quizDuration' => 'required|integer|min:1',
             'quizSet' => 'required|string|max:255',
+            'subject' => 'required|exists:subjects,id',
             'startDate' => 'required|date|before:endDate',
             'endDate' => 'required|date|after:startDate',
         ]);
-    
+
         // Insert quiz metadata into quiz_lists
         $quizList = QuizList::create([
             'user_id' => auth()->id(),
             'quiz_name' => $this->quizName,
             'duration' => $this->quizDuration,
             'quiz_set' => $this->quizSet,
-            'start_date' => Carbon::parse($this->startDate), // Convert to proper datetime
-            'end_date' => Carbon::parse($this->endDate), // Convert to proper datetime
+            'subject_id' => $this->subject, // Save the subject association
+            'start_date' => $this->startDate,
+            'end_date' => $this->endDate,
         ]);
-    
-        // Process the CSV file and insert questions into quizzes
+
+        // Process the CSV file
         if (($handle = fopen($this->csvFile->getRealPath(), 'r')) !== false) {
-            $header = fgetcsv($handle); // Skip the header row if present
+            $header = fgetcsv($handle); // Skip the header row
             while ($row = fgetcsv($handle)) {
                 Quiz::create([
-                    'quiz_id' => $quizList->quiz_id, // Link to the newly created quiz_list entry
+                    'quiz_id' => $quizList->quiz_id,
                     'user_id' => auth()->id(),
-                    'question' => $row[0] ?? '', // Question text
+                    'question' => $row[0] ?? '',
                     'option' => json_encode([
-                        $row[1] ?? null, // Option 1
-                        $row[2] ?? null, // Option 2
-                        $row[3] ?? null, // Option 3
-                        $row[4] ?? null, // Option 4
+                        $row[1] ?? null,
+                        $row[2] ?? null,
+                        $row[3] ?? null,
+                        $row[4] ?? null,
                     ]),
-                    'correct_answer' => $row[5] ?? '', // Correct answer
+                    'correct_answer' => $row[5] ?? '',
                 ]);
             }
             fclose($handle);
         }
-    
-        toastr()->success('Quiz ' . $this->quizName . ' created successfully.');
-        $this->reset(['csvFile', 'quizName', 'quizDuration', 'quizSet', 'startDate', 'endDate']);
+
+        toastr()->success('Quiz uploaded successfully!');
+        $this->reset(['csvFile', 'quizName', 'quizDuration', 'quizSet', 'subject', 'startDate', 'endDate']);
         $this->showModal = false;
-        
-        session()->flash('success', 'Quiz uploaded successfully!');
     }
 
     public function render()
     {
-        // Fetch all quizzes created by the current user
-        $quizzes = QuizList::where('user_id', auth()->id())
-            ->with('quizzes') // Load related questions
-            ->get();
-
         return view('livewire.quiz-upload', [
-            'quizzes' => $quizzes,
+            'quizzes' => QuizList::where('user_id', auth()->id())->with('quizzes')->get(),
+            'subjects' => auth()->user()->subjects, // Get subjects via the relationship
         ]);
     }
+    
 }
+

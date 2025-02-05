@@ -28,4 +28,11 @@ class Quiz extends Model
     {
         return $this->belongsTo(QuizList::class, 'quiz_id', 'quiz_id');
     }
+
+    public function subject()
+    {
+        return $this->belongsTo(Subject::class);
+    }
+
+    
 }

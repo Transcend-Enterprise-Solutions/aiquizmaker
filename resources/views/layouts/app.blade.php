@@ -11,6 +11,7 @@
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css">
         <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
         <meta name="csrf-token" content="{{ csrf_token() }}">
+        <script src="https://cdn.jsdelivr.net/npm/alpinejs@2.8.2/dist/alpine.min.js" defer></script>
 
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     @livewireStyles
@@ -19,11 +20,15 @@
     <div class="min-h-screen flex flex-col">
 
         @if(Auth::user()->role == 'instructor')
-            @include('nav')
+            @include('instnav')
         @endif
 
         @if(Auth::user()->role == 'admin')
             @include('adminnav')
+        @endif
+
+        @if(Auth::user()->role == 'student')
+            @include('studnav')
         @endif
 
         <!-- Main Content -->

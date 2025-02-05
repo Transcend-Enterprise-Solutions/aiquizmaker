@@ -16,6 +16,23 @@ class Subject extends Model
         return $this->belongsTo(User::class, 'created_by');
     }
 
+
+
+    public function students()
+    {
+        return $this->belongsToMany(User::class, 'student_subject', 'subject_id', 'student_id');
+    }
+
+    public function quizzes()
+    {
+        return $this->hasMany(Quiz::class);
+    }
+    
+    public function quizLists()
+    {
+        return $this->hasMany(QuizList::class, 'subject_id', 'id');
+    }
+    
     public function instructors()
     {
         return $this->belongsToMany(User::class, 'instructor_subject', 'subject_id', 'instructor_id');

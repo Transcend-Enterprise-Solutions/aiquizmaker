@@ -145,45 +145,45 @@
                 </div>
                 <!-- Actions -->
                 <div class="flex justify-end space-x-2">
-                    <!-- Cancel Button -->
-                    <button 
-                        type="button" 
-                        class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-semibold px-4 py-2 rounded-md"
-                        wire:click="closeModal"
-                        wire:loading.attr="disabled"
-                        wire:target="closeModal">
-                        Cancel
-                    </button>
+                <!-- Cancel Button -->
+                <button 
+                    type="button" 
+                    class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-semibold px-4 py-2 rounded-md"
+                    wire:click="closeModal"
+                    wire:loading.attr="disabled"
+                    wire:target="closeModal">
+                    Cancel
+                </button>
 
-                    <!-- Save Button -->
-                    <button 
-                        type="submit" 
-                        class="bg-blue-500 hover:bg-blue-600 text-white font-semibold px-4 py-2 rounded-md flex items-center justify-center"
-                        wire:target="submit"
-                        wire:loading.attr="disabled">
-                        <span wire:loading.remove wire:target="submit">Save</span>
-                        <svg 
-                            wire:loading wire:target="submit" 
-                            class="animate-spin h-5 w-5 text-white ml-2" 
-                            xmlns="http://www.w3.org/2000/svg" 
-                            fill="none" 
-                            viewBox="0 0 24 24">
-                            <circle 
-                                class="opacity-25" 
-                                cx="12" 
-                                cy="12" 
-                                r="10" 
-                                stroke="currentColor" 
-                                stroke-width="4">
-                            </circle>
-                            <path 
-                                class="opacity-75" 
-                                fill="currentColor" 
-                                d="M4 12a8 8 0 018-8v8H4z">
-                            </path>
-                        </svg>
-                    </button>
-                </div>
+                <!-- Save Button -->
+                <button 
+                    type="submit" 
+                    class="bg-blue-500 hover:bg-blue-600 text-white font-semibold px-4 py-2 rounded-md flex items-center justify-center"
+                    wire:target="submit"
+                    wire:loading.attr="disabled">
+                    <span wire:loading.remove wire:target="submit">Save</span>
+                    <svg 
+                        wire:loading wire:target="submit" 
+                        class="animate-spin h-5 w-5 text-white ml-2" 
+                        xmlns="http://www.w3.org/2000/svg" 
+                        fill="none" 
+                        viewBox="0 0 24 24">
+                        <circle 
+                            class="opacity-25" 
+                            cx="12" 
+                            cy="12" 
+                            r="10" 
+                            stroke="currentColor" 
+                            stroke-width="4">
+                        </circle>
+                        <path 
+                            class="opacity-75" 
+                            fill="currentColor" 
+                            d="M4 12a8 8 0 018-8v8H4z">
+                        </path>
+                    </svg>
+                </button>
+            </div>
 
             </form>
         </div>

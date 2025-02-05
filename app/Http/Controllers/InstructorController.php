@@ -36,5 +36,13 @@ class InstructorController extends Controller
         }
         return view('dashboards.instructorfolder.upload');
     }
+
+    public function enroll()
+    {
+        if (auth()->user()->role !== 'instructor') {
+            abort(403, 'Unauthorized');
+        }
+        return view('dashboards.instructorfolder.enroll');
+    }
     
 }
