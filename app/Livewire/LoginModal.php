@@ -40,7 +40,7 @@ class LoginModal extends Component
             if ($user->role === 'admin') {
                 return redirect()->to('/admin-dashboard');
             } elseif ($user->role === 'instructor') {
-                return redirect()->to('/instructor-dashboard');
+                return redirect()->to('/instructor/dashboard');
             } elseif ($user->role === 'student') {
                 return redirect()->to('/student/dashboard');
             } else {

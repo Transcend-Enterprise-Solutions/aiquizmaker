@@ -1,8 +1,10 @@
 <?php
 
 namespace App\Http\Controllers;
-
+use App\Models\Subject;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+
 
 class InstructorController extends Controller
 {
@@ -45,4 +47,20 @@ class InstructorController extends Controller
         return view('dashboards.instructorfolder.enroll');
     }
     
+    public function subject()
+    {
+        // Ensure only instructors can access this page
+        if (auth()->user()->role !== 'instructor') {
+            abort(403, 'Unauthorized');
+        }
+    
+        // Fetch subjects assigned to the logged-in instructor
+        $subjects = Auth::user()
+            ->instructorSubjects() // Assuming this is the relationship to fetch subjects
+            ->with(['quizzes', 'students', 'creator']) // Eager load related data
+            ->get();
+    
+        // Pass the filtered subjects to the view
+        return view('dashboards.instructorfolder.subjects', compact('subjects'));
+    }
 }

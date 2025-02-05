@@ -16,8 +16,14 @@ class StudentQuizResult extends Model
         'total_questions',
         'percentage',
         'status',
-    ];
 
+    ];
+    
+    public function student()
+    {
+        return $this->belongsTo(User::class, 'student_id');
+    }
+    
     // Define the quiz relationship
     public function quiz()
     {

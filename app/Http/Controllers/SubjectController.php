@@ -46,9 +46,14 @@ class SubjectController extends Controller
         return back()->with('success', 'Subject assigned to instructor successfully!');
     }
 
-    /**
-     * Show the form to assign subjects to instructors.
-     */
+    public function show($subjectId)
+    {
+        // Load the subject with quizzes and students
+        $subject = Subject::with(['quizzes.questions', 'students'])->findOrFail($subjectId);
+
+        return view('dashboards.instructorfolder.subject-details', compact('subject'));
+    }
+    
     public function showAssignSubjectForm()
     {
         $instructors = User::where('role', 'instructor')->get();

@@ -98,6 +98,8 @@ Route::get('/student/quiz/{quizId}', [StudentController::class, 'takeQuiz'])->na
 Route::get('/student/quiz/{quizId}/review', [StudentController::class, 'reviewQuiz'])->name('student.reviewQuiz');
 
 
+
+
 Route::get('/student/results', [StudentController::class, 'showResults'])->name('student.results');
 
 
@@ -107,7 +109,7 @@ Route::get('/student/results', [StudentController::class, 'showResults'])->name(
 
 // Profile Routes
 // Instructor Dashboard
-Route::get('/instructor-dashboard', [InstructorController::class, 'index'])
+Route::get('/instructor/dashboard', [InstructorController::class, 'index'])
     ->name('instructor.dashboard')
     ->middleware('auth');
 
@@ -140,6 +142,13 @@ Route::post('/admin/assign-subject', [AdminController::class, 'assignSubjectToSt
     ->middleware('auth');
 
 
+Route::get('/subjects/{subjectId}', [SubjectController::class, 'show'])->name('subject.details');
+
+
+Route::get('/quizzes/{quizId}/stats', [QuizController::class, 'getQuizData'])->name('quiz.stats');
+Route::get('/quizzes/{quizId}', [QuizController::class, 'show'])->name('quiz.details');
+
+
 
 // Route for the Instructor Dashboard (Welcome page)
 Route::get('/instructor/dashboard', [InstructorController::class, 'index'])
@@ -156,6 +165,16 @@ Route::get('/instructor/quiz', [InstructorController::class, 'quiz'])
 Route::get('/instructor/upload', [InstructorController::class, 'upload'])
     ->name('instructor.upload')
     ->middleware('auth');
+
+
+
+// Route for Instructor Uplaod CSV, named 'instructor.upload'
+Route::get('/instructor/subjects', [InstructorController::class, 'subject'])
+    ->name('instructor.subjects')
+    ->middleware('auth');
+
+
+Route::delete('/instructor/quiz/delete', [InstructorController::class, 'delete'])->name('quiz.delete');
 
 
     // Route for Instructor Uplaod CSV, named 'instructor.upload'

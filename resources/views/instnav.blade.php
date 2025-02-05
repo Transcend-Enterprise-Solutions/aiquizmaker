@@ -64,15 +64,6 @@
               </div>
               <ul class="py-1">
                 <li>
-                  <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-600 dark:hover:text-white">Dashboard</a>
-                </li>
-                <li>
-                  <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-600 dark:hover:text-white">Settings</a>
-                </li>
-                <li>
-                  <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-600 dark:hover:text-white">Earnings</a>
-                </li>
-                <li>
                   <a href="{{ route('logout') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-600 dark:hover:text-white" onclick="event.preventDefault(); document.getElementById('logout-form').submit();">Sign out</a>
                   <form id="logout-form" action="{{ route('logout') }}" method="POST" class="hidden">
                     @csrf
@@ -97,9 +88,8 @@
             {{ request()->routeIs('instructor.welcome') ? 'bg-gray-200 dark:bg-gray-800 text-indigo-600' : '' }}">
             <svg class="w-5 h-5 transition duration-75 
                 {{ request()->routeIs('instructor.welcome') ? 'text-indigo-600' : 'text-gray-500 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white' }}" 
-                xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 22 21">
-                <path d="M16.975 11H10V4.025a1 1 0 0 0-1.066-.998 8.5 8.5 0 1 0 9.039 9.039.999.999 0 0 0-1-1.066h.002Z"/>
-                <path d="M12.5 0c-.157 0-.311.01-.565.027A1 1 0 0 0 11 1.02V10h8.975a1 1 0 0 0 1-.935c.013-.188.028-.374.028-.565A8.51 8.51 0 0 0 12.5 0Z"/>
+                xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/>
             </svg>
             <span class="ms-3">Dashboard</span>
           </a>
@@ -110,8 +100,8 @@
             {{ request()->routeIs('instructor.quiz') ? 'bg-gray-200 dark:bg-gray-800 text-indigo-600' : '' }}">
             <svg class="w-5 h-5 transition duration-75 
                 {{ request()->routeIs('instructor.quiz') ? 'text-indigo-600' : 'text-gray-500 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white' }}" 
-                xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
-                <path fill-rule="evenodd" d="M18 8a8 8 0 1 1-16 0 8 8 0 0 1 16 0zM9 4a1 1 0 0 1 2 0v4a1 1 0 0 1-2 0V4zm1 10a1 1 0 1 1 0-2 1 1 0 0 1 0 2z" clip-rule="evenodd"/>
+                xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M3 6h18v2H3V6zm0 5h12v2H3v-2zm0 5h18v2H3v-2z"/>
             </svg>
             <span class="ms-3">Quiz Generator</span>
           </a>
@@ -122,10 +112,10 @@
             {{ request()->routeIs('instructor.upload') ? 'bg-gray-200 dark:bg-gray-800 text-indigo-600' : '' }}">
             <svg class="w-5 h-5 transition duration-75 
                 {{ request()->routeIs('instructor.upload') ? 'text-indigo-600' : 'text-gray-500 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white' }}" 
-                xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
-                <path fill-rule="evenodd" d="M10 2a8 8 0 1 1-8 8 8 8 0 0 1 8-8zm3 9H7a1 1 0 1 1 0-2h6a1 1 0 0 1 0 2z" clip-rule="evenodd"/>
+                xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M14 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V8l-6-6zM13 9V3.5L18.5 9H13z"/>
             </svg>
-            <span class="ms-3">Upload Quiz</span>
+            <span class="ms-3">Manage Quiz</span>
           </a>
       </li>
       <li>
@@ -134,13 +124,24 @@
             {{ request()->routeIs('instructor.enroll') ? 'bg-gray-200 dark:bg-gray-800 text-indigo-600' : '' }}">
             <svg class="w-5 h-5 transition duration-75 
                 {{ request()->routeIs('instructor.enroll') ? 'text-indigo-600' : 'text-gray-500 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white' }}" 
-                xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
-                <path fill-rule="evenodd" d="M10 2a8 8 0 1 1-8 8 8 8 0 0 1 8-8zm3 9H7a1 1 0 1 1 0-2h6a1 1 0 0 1 0 2z" clip-rule="evenodd"/>
+                xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5s-3 1.34-3 3 1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V20h14v-3.5c0-2.33-4.67-3.5-7-3.5zM6 11c1.66 0 3-1.34 3-3S7.66 5 6 5 3 6.34 3 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V20h7v-3.5c0-2.33 4.67-3.5 7-3.5H6z"/>
             </svg>
-            <span class="ms-3">Enroll a student</span>
+            <span class="ms-3">Enroll a Student</span>
           </a>
       </li>
-
+      <li>
+          <a wire:navigate href="{{ route('instructor.subjects') }}" 
+              class="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group
+              {{ request()->routeIs('instructor.subjects') ? 'bg-gray-200 dark:bg-gray-800 text-indigo-600' : '' }}">
+              <svg class="w-5 h-5 transition duration-75 
+                  {{ request()->routeIs('instructor.subjects') ? 'text-indigo-600' : 'text-gray-500 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white' }}" 
+                  xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M4 6v12h16V6H4zm2 10V8h12v8H6zm4-7h4v2h-4v-2zm0 4h4v2h-4v-2z"/>
+              </svg>
+              <span class="ms-3">Subjects</span>
+          </a>
+      </li>
       </ul>
    </div>
 </aside>

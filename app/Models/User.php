@@ -26,6 +26,7 @@ class User extends Authenticatable
         'role_id', // Add role_id here
     ];
 
+
     /**
      * The attributes that should be hidden for serialization.
      *
@@ -43,6 +44,11 @@ class User extends Authenticatable
      *
      */
 
+    public function quizzes()
+    {
+        return $this->belongsToMany(QuizList::class, 'student_quiz_results', 'student_id', 'quiz_id')
+            ->withPivot('score');
+    }
 
     public function role()
     {
@@ -59,8 +65,13 @@ class User extends Authenticatable
     {
         return $this->belongsToMany(Subject::class, 'student_subject', 'student_id', 'subject_id');
     }
+    
 
-
+    public function instructorSubjects()
+    {
+        return $this->belongsToMany(Subject::class, 'instructor_subject', 'instructor_id', 'subject_id');
+    }
+    
 
     public function hasRole($role)
     {

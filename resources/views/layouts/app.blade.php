@@ -12,6 +12,9 @@
         <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
         <meta name="csrf-token" content="{{ csrf_token() }}">
         <script src="https://cdn.jsdelivr.net/npm/alpinejs@2.8.2/dist/alpine.min.js" defer></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.3.0/flowbite.min.js"></script>
+        <script src="//unpkg.com/alpinejs" defer></script>
+        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     @livewireStyles

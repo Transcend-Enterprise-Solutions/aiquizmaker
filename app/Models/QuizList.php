@@ -36,11 +36,16 @@ class QuizList extends Model
         
     public function subject()
     {
-        return $this->belongsTo(Subject::class);
+        return $this->belongsTo(Subject::class, 'subject_id', 'id');
     }
 
     public function quizzes()
     {
         return $this->hasMany(Question::class, 'quiz_id', 'quiz_id'); // 'quiz_id' is the foreign key in the questions table
+    }
+
+    public function studentResults()
+    {
+        return $this->hasMany(StudentQuizResult::class, 'quiz_id', 'quiz_id');
     }
 }

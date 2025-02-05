@@ -9,19 +9,53 @@ use App\Models\User;
 use Carbon\Carbon;
 use App\Models\StudentQuizAttempt;
 use App\Models\StudentQuizResult;
+use App\Models\Question;
 
 
 class StudentController extends Controller
 {
     public function index()
     {
-        if (auth()->user()->role !== 'student') {
-            abort(403, 'Unauthorized');
-        }
-
-        return view('dashboards.studentfolder.welcome');
+        $studentId = auth()->id();
+    
+        // Total courses enrolled
+        $totalCourses = Auth::user()->enrolledSubjects()->count();
+    
+        // Total quizzes taken
+        $quizzesTaken = StudentQuizResult::where('student_id', $studentId)->count();
+    
+        // Average score
+        $averageScore = StudentQuizResult::where('student_id', $studentId)->avg('percentage') ?? 0;
+    
+        // Pass percentage
+        $passPercentage = StudentQuizResult::where('student_id', $studentId)
+            ->where('status', 'Pass')
+            ->count();
+    
+        // Get upcoming quizzes
+        $upcomingQuizzes = Auth::user()->enrolledSubjects()
+            ->with(['quizLists' => function ($query) {
+                $query->where('start_date', '>', now())->orderBy('start_date');
+            }])
+            ->get();
+    
+        return view('dashboards.studentfolder.welcome', compact(
+            'totalCourses', 'quizzesTaken', 'averageScore', 'passPercentage', 'upcomingQuizzes'
+        ));
     }
-
+    
+    public function upcomingQuizzes()
+    {
+        $now = Carbon::now();
+        $upcomingQuizzes = QuizList::whereHas('students', function ($query) {
+            $query->where('student_id', auth()->id());
+        })->where('start_date', '>', $now)
+          ->orderBy('start_date', 'asc')
+          ->get();
+    
+        return view('dashboards.studentfolder.upcoming-quizzes', compact('upcomingQuizzes'));
+    }
+    
     public function getStudents()
     {
         // Fetch only students with the role 'student'
@@ -38,16 +72,25 @@ class StudentController extends Controller
      */
     public function enrolledSubjects()
     {
-
-
+        // Ensure the user is a student
         if (auth()->user()->role !== 'student') {
             abort(403, 'Unauthorized');
         }
-
-
-        $enrolledSubjects = Auth::user()->enrolledSubjects; // Use the relationship in the User model
-        return view('dashboards.studentfolder.subjects', compact('enrolledSubjects'));
+    
+        // Fetch the enrolled subjects with related data
+        $subjects = Auth::user()
+            ->enrolledSubjects()
+            ->with(['instructors', 'quizzes'])
+            ->get();
+    
+        // Pass the subjects to the view
+        return view('dashboards.studentfolder.subjects', compact('subjects'));
     }
+    
+
+
+
+
 
     public function quizzes()
     {
@@ -131,23 +174,43 @@ class StudentController extends Controller
     
     
     
-    public function showResults()
+    public function showResults(Request $request)
     {
-        $results = StudentQuizResult::where('student_id', auth()->id())->with('quiz')->get();
-
-        // Fetch the student's quiz attempts (questions and answers)
-        foreach ($results as $result) {
-            $result->attempts = StudentQuizAttempt::where('quiz_id', $result->quiz_id)
-                                                ->where('student_id', auth()->id())
-                                                ->get();
+        $sortField = $request->query('sort', 'created_at'); // Default sort by date
+        $sortDirection = $request->query('direction', 'desc'); // Default descending
+        $filterStatus = $request->query('status'); // Optional filter
+    
+        // Fetch results with sorting and filtering
+        $query = StudentQuizResult::where('student_id', auth()->id())->with('quiz');
+    
+        if ($filterStatus) {
+            $query->where('status', $filterStatus);
         }
-
-        return view('dashboards.studentfolder.results', compact('results'));
+    
+        $results = $query->orderBy($sortField, $sortDirection)->get();
+    
+        return view('dashboards.studentfolder.results', compact('results', 'sortField', 'sortDirection', 'filterStatus'));
     }
+    
+    public function subjectProgress()
+    {
+        $subjects = Auth::user()->enrolledSubjects()->with(['quizzes', 'quizzes.results'])->get();
+    
+        foreach ($subjects as $subject) {
+            $totalQuizzes = $subject->quizzes->count();
+            $passedQuizzes = $subject->quizzes->where('results.status', 'Pass')->count();
+            $subject->progress = $totalQuizzes > 0 ? ($passedQuizzes / $totalQuizzes) * 100 : 0;
+        }
+    
+        return view('dashboards.studentfolder.subject-progress', compact('subjects'));
+    }
+    
+
     public function reviewQuiz($quizId)
     {
         $quiz = QuizList::with('questions')->findOrFail($quizId);
-    
+
+
         // Get the student's quiz attempts
         $attempts = StudentQuizAttempt::where('quiz_id', $quizId)
                                       ->where('student_id', auth()->id())

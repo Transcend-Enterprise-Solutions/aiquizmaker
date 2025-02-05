@@ -25,8 +25,9 @@ class Subject extends Model
 
     public function quizzes()
     {
-        return $this->hasMany(Quiz::class);
+        return $this->hasMany(QuizList::class, 'subject_id'); // Ensure 'subject_id' exists in the QuizList table
     }
+    
     
     public function quizLists()
     {

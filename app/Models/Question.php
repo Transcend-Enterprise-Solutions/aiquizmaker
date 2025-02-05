@@ -27,4 +27,28 @@ class Question extends Model
     {
         return $this->belongsTo(QuizList::class, 'quiz_id', 'quiz_id'); // 'quiz_id' links this question to its quiz
     }
+
+    /**
+     * Ensure 'option' is always returned as an array.
+     */
+    public function getOptionAttribute($value)
+    {
+        return is_array($value) ? $value : json_decode($value, true) ?? [];
+    }
+    
+    protected $casts = [
+        'option' => 'array',
+    ];
+    /**
+     * Ensure 'option' is always saved as JSON.
+     */
+    public function setOptionAttribute($value)
+    {
+        $this->attributes['option'] = json_encode($value);
+    }
+
+    public function quiz()
+    {
+        return $this->belongsTo(QuizList::class);
+    }
 }
