@@ -16,7 +16,13 @@
         <script src="//unpkg.com/alpinejs" defer></script>
         <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-    @vite(['resources/css/app.css', 'resources/js/app.js'])
+    {{-- @vite(['resources/css/app.css', 'resources/js/app.js']) --}}
+    <!-- Scripts -->
+    <script defer src="build/assets/app-BPnfBaih.js"></script>
+
+    <!-- Styles -->
+    <link rel="stylesheet" href="build/assets/app-D2EO3Rc0.css">
+
     @livewireStyles
 </head>
 <body class="bg-gray-50 dark:bg-gray-900 text-gray-800 dark:text-gray-200">
