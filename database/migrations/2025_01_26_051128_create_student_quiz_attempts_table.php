@@ -12,15 +12,15 @@ class CreateStudentQuizAttemptsTable extends Migration
             $table->id();
             $table->unsignedBigInteger('student_id');
             $table->unsignedBigInteger('quiz_id');
-            $table->unsignedBigInteger('question_id');
+            // $table->unsignedBigInteger('question_id');
             $table->text('answer')->nullable();
             $table->boolean('is_correct')->default(false);
             $table->timestamps();
 
             // Foreign keys
             $table->foreign('student_id')->references('id')->on('users')->onDelete('cascade');
-            $table->foreign('quiz_id')->references('quiz_id')->on('quiz_list')->onDelete('cascade');
-            $table->foreign('question_id')->references('id')->on('questions')->onDelete('cascade');
+            $table->foreign('quiz_id')->references('id')->on('quiz_list')->onDelete('cascade');
+            // $table->foreign('question_id')->references('id')->on('questions')->onDelete('cascade');
         });
     }
 
