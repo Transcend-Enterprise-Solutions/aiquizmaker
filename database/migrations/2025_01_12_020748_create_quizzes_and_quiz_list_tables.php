@@ -10,7 +10,7 @@ class CreateQuizzesAndQuizListTables extends Migration
     {
         // Create the quiz_list table
         Schema::create('quiz_list', function (Blueprint $table) {
-            $table->id('quiz_id'); // Primary Key
+            $table->id('id'); // Primary Key
             $table->unsignedBigInteger('user_id');
             $table->string('quiz_name');
             $table->integer('duration'); // Duration in minutes
@@ -30,7 +30,7 @@ class CreateQuizzesAndQuizListTables extends Migration
             $table->string('correct_answer');
             $table->timestamps();
 
-            $table->foreign('quiz_id')->references('quiz_id')->on('quiz_list')->onDelete('cascade');
+            $table->foreign('quiz_id')->references('id')->on('quiz_list')->onDelete('cascade');
             $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
         });
     }
